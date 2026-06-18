@@ -1,0 +1,23 @@
+# Terraform working directory and state (any week)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Saved binary plans. The JSON evidence under each week's evidence/ is committed on purpose.
+**/tfplan
+**/*.tfplan
+
+# Local variable values (environment-specific; may hold sensitive data)
+**/terraform.tfvars
+**/*.auto.tfvars
+**/*.auto.tfvars.json
+
+# Editor / backup artifacts
+*.orig
+*.bak
+
+# Kept intentionally (do NOT ignore):
+#   **/.terraform.lock.hcl  -> pins provider versions
+#   **/evidence/plan.json   -> machine-readable compliance evidence
