@@ -109,4 +109,9 @@ terraform destroy
 
 ![tfvalidate](./screenshots/tfvalidate.png)
 
+## Resources
+
+- [YouTube Walkthrough](https://youtu.be/Jtd0snHKdms)
+- [6-Week GRC Pipeline Challenge](https://www.patreon.com/GRCEngineeringClub/posts/6-week-grc-build-161004225)
+
 ---
