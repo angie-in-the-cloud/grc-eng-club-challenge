@@ -1,13 +1,8 @@
 # Build the Gate: Compliance-as-Code in CI (Week 3)
 
-Week 2 turned three NIST 800-53 controls into executable Rego policies. Running
-them on a laptop catches your own mistakes. This week wires those same policies
-into a **GitHub Actions gate** that runs on every pull request to `main` and
-**blocks the ones that break a control** automatically, in seconds, before a
-human is ever involved.
+Week 2 turned three NIST 800-53 controls into executable Rego policies. Running them on a laptop catches your own mistakes. This week wires those same policies into a **GitHub Actions gate** that runs on every pull request to `main` and **blocks the ones that break a control** automatically, in seconds, before a human is ever involved.
 
-Nobody reviews the change for encryption. The pipeline does. A person only gets
-pulled in when something is actually wrong.
+Nobody reviews the change for encryption. The pipeline does. A person only gets pulled in when something is actually wrong.
 
 ## What the gate enforces
 
