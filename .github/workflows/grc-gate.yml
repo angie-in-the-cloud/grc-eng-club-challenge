@@ -1,0 +1,60 @@
+name: grc-gate
+
+# Runs the week 2 policy library against a committed Terraform plan on every
+# pull request to main, and blocks the ones that break a control.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Minimal, explicit permissions. contents: read to check out the repo,
+# pull-requests: write so the gate can comment its verdict on the PR.
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  CONFTEST_VERSION: "0.68.2"
+  PLAN_FILE: week-3/plan.json
+  POLICY_DIR: week-2/policies
+
+jobs:
+  grc-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pin Conftest to an exact version. Never "latest": a gate must be
+      # reproducible, and an upgrade should be a deliberate, reviewable change.
+      - name: Install Conftest (pinned)
+        run: |
+          curl -sSfL "https://github.com/open-policy-agent/conftest/releases/download/v${CONFTEST_VERSION}/conftest_${CONFTEST_VERSION}_Linux_x86_64.tar.gz" -o conftest.tar.gz
+          tar xzf conftest.tar.gz conftest
+          sudo mv conftest /usr/local/bin/conftest
+          conftest --version
+
+      # Run all three control namespaces against the committed plan.
+      # set -o pipefail keeps Conftest's non-zero exit even though we pipe
+      # through tee, so a violation fails the job (fail closed). The JSON
+      # results are written first, so the evidence exists no matter the verdict.
+      - name: Run GRC policy gate
+        run: |
+          set -o pipefail
+          mkdir -p evidence
+          conftest test \
+            --policy "${POLICY_DIR}" \
+            --namespace compliance.sc28_aws \
+            --namespace compliance.ac3_aws \
+            --namespace compliance.cm6_aws \
+            --output json \
+            "${PLAN_FILE}" | tee evidence/conftest-results.json
+
+      # always() so the evidence uploads even when the gate fails. The whole
+      # point of CI evidence is to have a durable record of the failure.
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grc-gate-evidence
+          path: evidence/
+          if-no-files-found: error
