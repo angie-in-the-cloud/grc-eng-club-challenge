@@ -71,7 +71,16 @@ terraform show -json tfplan > ../week-3/plan.json
 
 Then turn on branch protection (**Settings → Branches**) and require the
 `grc-gate` check. Now the red PR genuinely cannot be merged until it is fixed.
-Screenshot both checks, green and red side by side.
+
+### Evidence
+
+**Green PR: compliant plan, check passes, merge allowed:**
+
+![green PR passing](screenshots/green-pass.png)
+
+**Red PR: encryption removed, check fails, merge blocked:**
+
+![red PR blocked](screenshots/red-blocked.png)
 
 ## Done when
 
