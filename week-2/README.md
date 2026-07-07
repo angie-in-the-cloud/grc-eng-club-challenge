@@ -35,7 +35,7 @@ In the plan JSON, an encryption resource records that its `bucket` argument refe
 
 ## Run the unit tests
 
-The tests are self-contained: each carries small fake plans, so no AWS or Terraform is needed.
+The tests are self-contained: each carries small mock plans, so no AWS or Terraform is needed.
 
 ```bash
 opa test policies/ -v
