@@ -1,17 +1,21 @@
 name: grc-gate
 
 # Runs the week 2 policy library against a committed Terraform plan on every
-# pull request to main, and blocks the ones that break a control.
+# pull request to main, blocks the ones that break a control, then signs the
+# evidence so anyone can prove it is authentic and untouched (week 4).
 on:
   pull_request:
     branches: [main]
   workflow_dispatch:
 
 # Minimal, explicit permissions. contents: read to check out the repo,
-# pull-requests: write so the gate can comment its verdict on the PR.
+# pull-requests: write so the gate can comment its verdict on the PR, and
+# id-token: write so Cosign can mint the OIDC token it needs for keyless
+# signing -- without it, sign-blob fails.
 permissions:
   contents: read
   pull-requests: write
+  id-token: write
 
 env:
   CONFTEST_VERSION: "0.68.2"
@@ -33,14 +37,17 @@ jobs:
           sudo mv conftest /usr/local/bin/conftest
           conftest --version
 
-      # Run all three control namespaces against the committed plan.
-      # set -o pipefail keeps Conftest's non-zero exit even though we pipe
-      # through tee, so a violation fails the job (fail closed). The JSON
+      # Run all three control namespaces against the committed plan, but DON'T
+      # fail the job here. Capture the verdict and defer the pass/fail decision
+      # to the last step, so the signing steps below always run -- a failed run
+      # is exactly the evidence we most want signed and preserved. The JSON
       # results are written first, so the evidence exists no matter the verdict.
       - name: Run GRC policy gate
+        id: gate
         run: |
           set -o pipefail
           mkdir -p evidence
+          set +e
           conftest test \
             --policy "${POLICY_DIR}" \
             --namespace compliance.sc28_aws \
@@ -48,13 +55,49 @@ jobs:
             --namespace compliance.cm6_aws \
             --output json \
             "${PLAN_FILE}" | tee evidence/conftest-results.json
+          code=${PIPESTATUS[0]}
+          set -e
+          echo "exit_code=${code}" >> "$GITHUB_OUTPUT"
 
-      # always() so the evidence uploads even when the gate fails. The whole
-      # point of CI evidence is to have a durable record of the failure.
-      - name: Upload evidence
+      # Keyless signing needs the Cosign binary on the runner.
+      - name: Install Cosign
+        if: always()
+        uses: sigstore/cosign-installer@v3.7.0
+
+      # Bundle the evidence into one archive, write its SHA-256 to a sidecar,
+      # and sign the archive keyless. The --bundle file packs the signature,
+      # the certificate, and the transparency-log entry into one file the
+      # verifier reads. This runs even when the gate failed.
+      - name: Bundle, hash, and sign evidence
+        if: always()
+        run: |
+          tar -czf evidence.tar.gz -C evidence .
+          sha256sum evidence.tar.gz | awk '{print $1}' > evidence.tar.gz.sha256
+          cosign sign-blob --yes \
+            --bundle evidence.sig.bundle \
+            evidence.tar.gz
+          ls -l evidence.tar.gz evidence.tar.gz.sha256 evidence.sig.bundle
+
+      # always() so the signed evidence uploads even when the gate fails. The
+      # whole point of CI evidence is a durable, verifiable record of the run.
+      - name: Upload signed evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: grc-gate-evidence
-          path: evidence/
+          path: |
+            evidence.tar.gz
+            evidence.tar.gz.sha256
+            evidence.sig.bundle
           if-no-files-found: error
+
+      # The pass/fail decision, last, so the signing steps above always run.
+      - name: Enforce gate verdict
+        if: always()
+        run: |
+          code="${{ steps.gate.outputs.exit_code }}"
+          if [ "${code}" != "0" ]; then
+            echo "GRC gate FAILED: policy violation(s) found (conftest exit ${code})."
+            exit 1
+          fi
+          echo "GRC gate PASSED: no violations."
