@@ -1,6 +1,6 @@
-# GRC Engineering Club Challenge
+# GRC Pipeline Challenge
 
-My work for the GRC Engineering Club challenge. Each week builds one brick of a compliance-as-code pipeline: express a security control as infrastructure, then emit machine-readable proof of it.
+My work for the GRC Pipeline Challenge. Each week builds one brick of a compliance-as-code pipeline: express a security control as infrastructure, then emit machine-readable proof of it.
 
 ## Weeks
 
