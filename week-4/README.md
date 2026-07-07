@@ -73,19 +73,19 @@ Why keyless beats a stored key: there is no long-lived private key to leak, rota
 Run after downloading the `grc-gate-evidence` artifact (or from a local `cosign sign-blob` run) so `evidence.tar.gz`, `evidence.tar.gz.sha256`, and `evidence.sig.bundle` sit in the current directory:
 
 ```bash
-# Tamper: copy the bundle and append a single byte
-cp evidence.tar.gz /tmp/tampered.tar.gz
-echo "junk" >> /tmp/tampered.tar.gz
-cp evidence.tar.gz.sha256 /tmp/tampered.tar.gz.sha256
+# Tamper: copy the bundle and append a few junk bytes
+cp evidence.tar.gz tampered.tar.gz                  # 1. copy the real bundle
+cp evidence.tar.gz.sha256 tampered.tar.gz.sha256    # 2. copy the real bundle's hash
+echo "junk" >> tampered.tar.gz                      # 3. modify the copy by appending junk bytes
 
 # Fails immediately on integrity -- the hash no longer matches
-./verify-evidence.sh /tmp/tampered.tar.gz
+./verify-evidence.sh tampered.tar.gz
 
 # The real bundle -- prints CHAIN INTACT
 ./verify-evidence.sh evidence.tar.gz
 ```
 
-One appended byte breaks the chain: the recomputed hash no longer matches the sidecar, and the signature was computed over the original bytes. Custody is mathematical, not a promise.
+Appended bytes break the chain: the recomputed hash no longer matches the sidecar, and the signature was computed over the original bytes. Custody is mathematical, not a promise.
 
 ### Screenshot of both runs (the failed tampered check and the passing `CHAIN INTACT`).
 
