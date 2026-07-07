@@ -90,4 +90,3 @@ never a wildcard)
 - Give the role read-only access. 
 - Keyless beats stored credentials because there is no long-lived secret to leak or rotate.
 
----
