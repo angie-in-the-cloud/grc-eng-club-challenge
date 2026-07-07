@@ -87,4 +87,8 @@ cp evidence.tar.gz.sha256 /tmp/tampered.tar.gz.sha256
 
 One appended byte breaks the chain: the recomputed hash no longer matches the sidecar, and the signature was computed over the original bytes. Custody is mathematical, not a promise.
 
-> Screenshot of both runs (the failed tampered check next to the passing `CHAIN INTACT`).
+### Screenshot of both runs (the failed tampered check and the passing `CHAIN INTACT`).
+
+![tamper-test](screenshots/tamper-test.png)
+
+---
