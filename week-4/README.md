@@ -136,6 +136,6 @@ CHAIN INTACT
 
 All four chain-of-custody properties -- authenticity, integrity, timeliness, and preservation -- verified in one run, against one bundle.
 
-![vault chain intact](vault/screenshots/vault-chain-intact.png)
+![vault chain intact](/screenshots/vault-chain-intact.png)
 
 ---
