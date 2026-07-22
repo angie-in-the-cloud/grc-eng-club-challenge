@@ -1,0 +1,140 @@
+{
+  "component-definition": {
+    "uuid": "72ca1fcd-b9d4-4b0f-8fae-acc1ceca9916",
+    "metadata": {
+      "title": "GRC Engineering Pipeline Component Definition",
+      "last-modified": "2026-07-22T18:29:50.253274+00:00",
+      "version": "1.0.0",
+      "oscal-version": "1.2.1",
+      "parties": [
+        {
+          "uuid": "970d185a-0151-456c-b719-17c0e83d004f",
+          "type": "person",
+          "name": "Angie"
+        }
+      ]
+    },
+    "components": [
+      {
+        "uuid": "df49b936-1d36-46ef-a441-a75cc425fdb8",
+        "type": "software",
+        "title": "GRC Pipeline",
+        "description": "A six-week compliance-as-code pipeline: Terraform infrastructure enforcing NIST 800-53 controls, Rego/OPA policies that evaluate the plan, a GitHub Actions gate that blocks non-compliant merges, and Cosign keyless signing that produces a verifiable, tamper-evident chain of custody for the evidence.",
+        "purpose": "Enforce and prove NIST 800-53 control implementation on AWS S3 infrastructure, and produce signed, verifiable evidence of that enforcement.",
+        "responsible-roles": [
+          {
+            "role-id": "provider",
+            "party-uuids": [
+              "970d185a-0151-456c-b719-17c0e83d004f"
+            ]
+          }
+        ],
+        "control-implementations": [
+          {
+            "uuid": "454dad85-1e22-4011-928f-4a6bb84ee877",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+            "description": "Controls implemented by the GRC Pipeline's Terraform baseline (week 1), enforced by the Rego policy gate (weeks 2-3), and proven with a signed evidence bundle (week 4).",
+            "implemented-requirements": [
+              {
+                "uuid": "e6e6a046-1e19-497e-93d2-fa56f08e1fd1",
+                "control-id": "sc-28",
+                "description": "Server-side encryption (AES-256) is enabled by default on both the primary and log S3 buckets via aws_s3_bucket_server_side_encryption_configuration, so data at rest is protected without relying on a person to configure it correctly. The Rego policy sc28_encryption_aws.rego denies any aws_s3_bucket that lacks a matching encryption configuration, gated on every pull request.",
+                "props": [
+                  {
+                    "name": "implementation-resource",
+                    "value": "aws_s3_bucket_server_side_encryption_configuration.primary"
+                  }
+                ],
+                "links": [
+                  {
+                    "href": "https://raw.githubusercontent.com/angie-in-the-cloud/grc-eng-club-challenge/main/week-4/evidence/evidence.tar.gz",
+                    "rel": "evidence",
+                    "text": "Signed evidence bundle (week 4 chain of custody, verified CHAIN INTACT)"
+                  },
+                  {
+                    "href": "https://github.com/angie-in-the-cloud/grc-eng-club-challenge/blob/main/week-1/main.tf",
+                    "rel": "reference",
+                    "text": "Terraform implementation"
+                  }
+                ],
+                "remarks": "The .sha256 sidecar and .sig.bundle signature file sit alongside this bundle at the same path in week-4/evidence/. Run week-4/verify-evidence.sh against all three to confirm CHAIN INTACT."
+              },
+              {
+                "uuid": "7cda79c7-2d04-493a-949f-d600527c1415",
+                "control-id": "ac-3",
+                "description": "aws_s3_bucket_public_access_block enforces all four public-access flags (block_public_acls, block_public_policy, ignore_public_acls, restrict_public_buckets) as true on every bucket, preventing any accidental public exposure. The Rego policy ac3_no_public_aws.rego denies any bucket where the block is missing or any flag is not true.",
+                "props": [
+                  {
+                    "name": "implementation-resource",
+                    "value": "aws_s3_bucket_public_access_block.primary"
+                  }
+                ],
+                "links": [
+                  {
+                    "href": "https://raw.githubusercontent.com/angie-in-the-cloud/grc-eng-club-challenge/main/week-4/evidence/evidence.tar.gz",
+                    "rel": "evidence",
+                    "text": "Signed evidence bundle (week 4 chain of custody, verified CHAIN INTACT)"
+                  },
+                  {
+                    "href": "https://github.com/angie-in-the-cloud/grc-eng-club-challenge/blob/main/week-1/main.tf",
+                    "rel": "reference",
+                    "text": "Terraform implementation"
+                  }
+                ],
+                "remarks": "The .sha256 sidecar and .sig.bundle signature file sit alongside this bundle at the same path in week-4/evidence/. Run week-4/verify-evidence.sh against all three to confirm CHAIN INTACT."
+              },
+              {
+                "uuid": "6368ea74-a65e-4ffc-be91-891d7b617934",
+                "control-id": "au-3",
+                "description": "The primary bucket has aws_s3_bucket_logging enabled, delivering access logs to a dedicated log bucket (aws_s3_bucket_acl set to log-delivery-write via aws_s3_bucket_ownership_controls), so every access to the primary bucket produces an audit record containing who accessed what and when.",
+                "props": [
+                  {
+                    "name": "implementation-resource",
+                    "value": "aws_s3_bucket_logging.primary"
+                  }
+                ],
+                "links": [
+                  {
+                    "href": "https://raw.githubusercontent.com/angie-in-the-cloud/grc-eng-club-challenge/main/week-4/evidence/evidence.tar.gz",
+                    "rel": "evidence",
+                    "text": "Signed evidence bundle (week 4 chain of custody, verified CHAIN INTACT)"
+                  },
+                  {
+                    "href": "https://github.com/angie-in-the-cloud/grc-eng-club-challenge/blob/main/week-1/main.tf",
+                    "rel": "reference",
+                    "text": "Terraform implementation"
+                  }
+                ],
+                "remarks": "The .sha256 sidecar and .sig.bundle signature file sit alongside this bundle at the same path in week-4/evidence/. Run week-4/verify-evidence.sh against all three to confirm CHAIN INTACT."
+              },
+              {
+                "uuid": "cf0600f6-5375-464f-b553-d6b6d6e1ab68",
+                "control-id": "cm-6",
+                "description": "The provider's default_tags block applies four required tags (Project, Environment, ManagedBy, ComplianceScope) to every taggable resource automatically, so configuration settings are consistent and traceable without relying on a person to tag resources by hand. The Rego policy cm6_required_tags_aws.rego denies any taggable resource missing one of the four tags.",
+                "props": [
+                  {
+                    "name": "implementation-resource",
+                    "value": "provider.aws.default_tags"
+                  }
+                ],
+                "links": [
+                  {
+                    "href": "https://raw.githubusercontent.com/angie-in-the-cloud/grc-eng-club-challenge/main/week-4/evidence/evidence.tar.gz",
+                    "rel": "evidence",
+                    "text": "Signed evidence bundle (week 4 chain of custody, verified CHAIN INTACT)"
+                  },
+                  {
+                    "href": "https://github.com/angie-in-the-cloud/grc-eng-club-challenge/blob/main/week-1/main.tf",
+                    "rel": "reference",
+                    "text": "Terraform implementation"
+                  }
+                ],
+                "remarks": "The .sha256 sidecar and .sig.bundle signature file sit alongside this bundle at the same path in week-4/evidence/. Run week-4/verify-evidence.sh against all three to confirm CHAIN INTACT."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
