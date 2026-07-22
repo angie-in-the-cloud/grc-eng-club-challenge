@@ -1,0 +1,14 @@
+{
+    "StandardsSubscriptions": [
+        {
+            "StandardsSubscriptionArn": "arn:aws:securityhub:us-east-1:399966706844:subscription/nist-800-53/v/5.0.0",
+            "StandardsArn": "arn:aws:securityhub:us-east-1::standards/nist-800-53/v/5.0.0",
+            "StandardsInput": {},
+            "StandardsStatus": "INCOMPLETE",
+            "StandardsControlsUpdatable": "READY_FOR_UPDATES",
+            "StandardsStatusReason": {
+                "StatusReasonCode": "NO_AVAILABLE_CONFIGURATION_RECORDER"
+            }
+        }
+    ]
+}
