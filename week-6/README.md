@@ -6,8 +6,6 @@ Two builds this week: an OSCAL control mapping authored with `trestle`, and the 
 
 Free. OSCAL is just JSON in the repo. There's nothing to deploy, nothing to tear down.
 
---
-
 ## What I built
 
 **`component-definitions/my-pipeline/component-definition.json`** - one component ("GRC Pipeline") with four `implemented-requirement` entries, one per control from week 1:
