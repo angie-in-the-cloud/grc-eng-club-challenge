@@ -78,10 +78,10 @@ cp evidence.tar.gz tampered.tar.gz                  # 1. copy the real bundle
 cp evidence.tar.gz.sha256 tampered.tar.gz.sha256    # 2. copy the real bundle's hash
 echo "junk" >> tampered.tar.gz                      # 3. modify the copy by appending junk bytes
 
-# Fails immediately on integrity -- the hash no longer matches
+# Fails immediately on integrity - the hash no longer matches
 ./verify-evidence.sh tampered.tar.gz
 
-# The real bundle -- prints CHAIN INTACT
+# The real bundle - prints CHAIN INTACT
 ./verify-evidence.sh evidence.tar.gz
 ```
 
@@ -97,7 +97,7 @@ Appended bytes break the chain: the recomputed hash no longer matches the sideca
 
 The vault lives in [`vault/`](vault/) as its own small Terraform config, separate from the signing pipeline above because it is optional infrastructure, not something every gate run needs.
 
-`vault/main.tf` builds an S3 bucket with `object_lock_enabled = true` -- a setting that can only be applied at bucket creation, never added later. A default retention rule in **COMPLIANCE** mode is attached, so every object uploaded is automatically protected: nobody, including the account root user, can shorten or delete that retention before it expires. Retention is currently set to 1 day (`retention_days` in `terraform.tfvars`) to keep the demonstration cheap and fast to verify; the value is a single variable, so a longer retention window for a production case is a one-line change.
+`vault/main.tf` builds an S3 bucket with `object_lock_enabled = true` - a setting that can only be applied at bucket creation, never added later. A default retention rule in **COMPLIANCE** mode is attached, so every object uploaded is automatically protected: nobody, including the account root user, can shorten or delete that retention before it expires. Retention is currently set to 1 day (`retention_days` in `terraform.tfvars`) to keep the demonstration cheap and fast to verify; the value is a single variable, so a longer retention window for a production case is a one-line change.
 
 ```bash
 cd vault
@@ -118,7 +118,7 @@ aws s3api get-object-retention --bucket "$BUCKET" --key evidence.tar.gz
 }
 ```
 
-With the bundle in the vault, `verify-evidence.sh`'s preservation check -- which prints `-- preservation: skipped` everywhere else in this repo, since no vault is set -- finally has something to check against:
+With the bundle in the vault, `verify-evidence.sh`'s preservation check which prints `-- preservation: skipped` everywhere else in this repo, since no vault is set, finally has something to check against:
 
 ```bash
 SIG_BUNDLE=evidence/evidence.sig.bundle \
@@ -134,7 +134,7 @@ OK  preservation: object-lock retained until 2026-07-23T20:01:10.397000+00:00
 CHAIN INTACT
 ```
 
-All four chain-of-custody properties -- authenticity, integrity, timeliness, and preservation -- verified in one run, against one bundle.
+All four chain-of-custody properties - authenticity, integrity, timeliness, and preservation - verified in one run, against one bundle.
 
 ![vault chain intact](screenshots/vault-chain-intact.png)
 
